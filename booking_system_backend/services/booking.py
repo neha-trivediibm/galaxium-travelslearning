@@ -142,3 +142,22 @@ def get_bookings(db: Session, user_id: int) -> list[BookingOut]:
     """Retrieve all bookings for a specific user."""
     bookings = db.query(Booking).filter(Booking.user_id == user_id).all()
     return [BookingOut.model_validate(b) for b in bookings]
+
+
+def get_booking_count(db: Session, user_id: int, status: str = None) -> int:
+    """Get the count of bookings for a user, optionally filtered by status.
+    
+    Args:
+        db: Database session
+        user_id: ID of the user
+        status: Optional status filter (booked, cancelled)
+    
+    Returns:
+        Count of bookings matching the criteria
+    """
+    query = db.query(Booking).filter(Booking.user_id == user_id)
+    
+    if status:
+        query = query.filter(Booking.status == status)
+    
+    return query.count()
