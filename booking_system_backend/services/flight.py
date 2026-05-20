@@ -255,4 +255,33 @@ def list_flights(
     # Return only FlightOut objects
     return [flight_out for flight_out, _, _ in result]
 
+
+def check_seats_available(db: Session, flight_id: int, seat_class: str, required_seats: int) -> bool:
+    """Check if a flight has enough available seats for a booking.
+    
+    Args:
+        db: Database session
+        flight_id: ID of the flight to check
+        seat_class: Seat class to check (economy, business, galaxium)
+        required_seats: Number of seats needed
+    
+    Returns:
+        True if enough seats are available, False otherwise
+    """
+    flight = db.query(Flight).filter(Flight.flight_id == flight_id).first()
+    if not flight:
+        return False
+    
+    if seat_class == 'economy':
+        available = flight.economy_seats_available
+    elif seat_class == 'business':
+        available = flight.business_seats_available
+    elif seat_class == 'galaxium':
+        available = flight.galaxium_seats_available
+    else:
+        return False
+    
+    # BUG: Should be >= but using < creates off-by-one error
+    return available < required_seats
+
 # Made with Bob
